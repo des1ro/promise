@@ -1,6 +1,6 @@
-export const promiseAllAwait = (arrayOfPromise: Promise<any>[]) => {
+export const promiseAllAwait = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve, reject) => {
-    const results: any[] = [];
+    const results: T[] = [];
     if (arrayOfPromise.length === 0) {
       resolve(results);
       return;
@@ -21,7 +21,7 @@ export const promiseAllAwait = (arrayOfPromise: Promise<any>[]) => {
   });
 };
 
-export const promiseRaceAwait = (arrayOfPromise: Promise<any>[]) => {
+export const promiseRaceAwait = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve, reject) => {
     if (arrayOfPromise.length === 0) {
       resolve(undefined);
@@ -39,19 +39,17 @@ export const promiseRaceAwait = (arrayOfPromise: Promise<any>[]) => {
   });
 };
 
-export const promiseLastAwait = (arrayOfPromise: Promise<any>[]) => {
+export const promiseLastAwait = <T>(arrayOfPromise: Promise<T>[]) => {
   if (arrayOfPromise.length === 0) {
     return Promise.resolve(undefined);
   }
-  let result: any = undefined;
-  return new Promise((resolve, reject) => {
+  let result: T;
+  return new Promise<T>((resolve, reject) => {
     arrayOfPromise.forEach(async (promise, index) => {
       try {
         result = await Promise.resolve(promise);
-        if (index === arrayOfPromise.length - 1) {
-          resolve(result);
-        }
       } catch (error) {
+      } finally {
         if (index === arrayOfPromise.length - 1) {
           resolve(result);
         }
@@ -60,9 +58,9 @@ export const promiseLastAwait = (arrayOfPromise: Promise<any>[]) => {
   });
 };
 
-export const promiseIgnoreErrorsAwait = (arrayOfPromise: Promise<any>[]) => {
-  return new Promise((resolve) => {
-    const results: any[] = [];
+export const promiseIgnoreErrorsAwait = <T>(arrayOfPromise: Promise<T>[]) => {
+  return new Promise<T[]>((resolve) => {
+    const results: T[] = [];
     if (arrayOfPromise.length === 0) {
       resolve(results);
       return;
@@ -71,15 +69,10 @@ export const promiseIgnoreErrorsAwait = (arrayOfPromise: Promise<any>[]) => {
       try {
         const result = await Promise.resolve(promise);
         results.push(result);
-
-        if (index === arrayOfPromise.length - 1) {
-          resolve(results);
-        }
-      } catch (err) {
-        if (index === arrayOfPromise.length - 1) {
-          resolve(results);
-        }
-      }
+      } catch (err) {}
     });
+    resolve(results);
   });
 };
+// 1 generyczny
+// 2 catch finnaly ify

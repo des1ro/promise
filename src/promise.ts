@@ -1,6 +1,6 @@
-export const promiseAll = (arrayOfPromise: Promise<any>[]) => {
+export const promiseAll = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve, reject) => {
-    const results: any[] = [];
+    const results: (T | void)[] = [];
     if (arrayOfPromise.length === 0) {
       resolve(results);
       return;
@@ -17,7 +17,7 @@ export const promiseAll = (arrayOfPromise: Promise<any>[]) => {
     });
   });
 };
-export const promiseRace = (arrayOfPromise: Promise<any>[]) => {
+export const promiseRace = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve, reject) => {
     if (arrayOfPromise.length === 0) {
       resolve(undefined);
@@ -35,15 +35,13 @@ export const promiseRace = (arrayOfPromise: Promise<any>[]) => {
   });
 };
 
-export const promiseLast = (arrayOfPromise: Promise<any>[]) => {
+export const promiseLast = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve) => {
     if (arrayOfPromise.length === 0) {
       resolve(undefined);
       return;
     }
-    let lastResult: any = undefined;
-    let resolved = false;
-
+    let lastResult: T;
     arrayOfPromise.forEach((promise, index) => {
       Promise.resolve(promise)
         .then((result) => {
@@ -56,29 +54,21 @@ export const promiseLast = (arrayOfPromise: Promise<any>[]) => {
     });
   });
 };
-export const promiseIgnoreErrors = (arrayOfPromise: Promise<any>[]) => {
+export const promiseIgnoreErrors = <T>(arrayOfPromise: Promise<T>[]) => {
   return new Promise((resolve) => {
-    let results: any = [];
-    let count = 0;
-    if (arrayOfPromise.length === 0) {
-      resolve(results);
-      return;
-    }
-    arrayOfPromise.forEach((promise) => {
+    let results: T[] = [];
+    arrayOfPromise.forEach((promise, index) => {
       Promise.resolve(promise)
         .then((result) => {
           results.push(result);
-          count++;
-          if (count === arrayOfPromise.length) {
-            resolve(results);
-          }
         })
-        .catch(() => {
-          count++;
-          if (count === arrayOfPromise.length) {
+        .catch(() => {})
+        .finally(() => {
+          if (index === arrayOfPromise.length - 1) {
             resolve(results);
           }
         });
     });
+    resolve(results);
   });
 };
